@@ -115,11 +115,15 @@ public abstract class XMLFileReader extends DefaultHandler {
             return;
         }
 
-        if (currentElementReader != null) {
-            if (textBuffer.length() > 0) {
-                currentElementReader.text(textBuffer.toString());
-                textBuffer.setLength(0);
-            }
+        // Patch: NPE 방어 — startElement 에서 ElementReader 가 push 되지 않은 채
+        // endElement 가 호출되는 경우 (예: master page 포함 HWPX) 회피.
+        if (currentElementReader == null) {
+            return;
+        }
+
+        if (textBuffer.length() > 0) {
+            currentElementReader.text(textBuffer.toString());
+            textBuffer.setLength(0);
         }
 
         currentElementReader.started(false);
